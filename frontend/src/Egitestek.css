@@ -1,0 +1,58 @@
+.egitestek-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.egitestek-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 25px;
+    margin-top: 20px;
+}
+
+.egitest-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.egitest-card h3 {
+    margin-top: 0;
+    color: #333;
+    border-bottom: 2px solid #3498db;
+    padding-bottom: 8px;
+}
+
+.image-wrapper .egitest-img {
+    width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 15px;
+}
+
+.description-section p {
+    color: #555;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.video-wrapper h4 {
+    margin-bottom: 5px;
+    font-size: 14px;
+    color: #666;
+}
+
+.egitest-video {
+    width: 100%;
+    border-radius: 4px;
+    margin-top: 5px;
+    background-color: #000;
+}

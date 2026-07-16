@@ -1,0 +1,23 @@
+.auth{
+    background-color: antiquewhite;
+    max-width: 400px;
+    margin: 50px auto;
+    font-family: 'sans-serif';
+}
+.loginform{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.regisztracios_link{
+    color: blue;
+    cursor: pointer;
+    font-size: 14px;
+}
+.mess_age{
+    font-weight: bold;
+    color: green;
+}
+.logout_btn{
+    margin-top: 10px;
+}

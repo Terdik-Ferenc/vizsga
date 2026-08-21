@@ -1,5 +1,5 @@
-- React frontend szerver indítása " npm start " parancsal.
-- Előtte " axios "-t kell telepíteni az " npm install axios " parancsal.
+- React frontend szerver indítása " npm run dev " parancsal.
+- Előtte " axios "-t és " jwt-decode " kell telepíteni az " npm install axios jwt-decode " parancsal.
 - A react környezet telepítése " npm install ".
 - A backend szerver inditása a szokásos " py manage.py runserver ".
 - A virtuális környezetet érdemes egy külön könytárba telepíteni pl. " py -m venv vizsga_env "

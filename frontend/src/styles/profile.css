@@ -1,0 +1,86 @@
+.page{
+    min-height:100vh;
+    background-image:url("../assets/hatter.webp");
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
+    background-repeat:no-repeat;
+
+    padding:40px;
+}
+.card{
+    width:400px;
+    background-color:#111827;
+    border-radius:18px;
+    padding:18px;
+    text-align:center;
+    transition:0.3s;
+}
+.Card-img{
+    width:200px;
+    height:200px;
+    object-fit:cover;
+    border-radius:14px;
+}
+.CardUserName{
+    color:#ffd700;
+}
+
+/* Táblázatos stílus */
+
+.user-table {
+  width: 100%;
+  max-width: 800px;
+  border-collapse: collapse;
+  margin-top: 20px;
+  background-color: rgba(17, 24, 39, 0.85); /* Sötét háttér enyhe átlátszósággal */
+  color: #ffffff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Fejléc és cellák formázása */
+/* .user-table th,  */
+.user-table td {
+  padding: 12px 18px;
+  text-align: left;
+  border-bottom: 1px solid #1f2937;
+}
+
+/* Fejléc stílusa */
+.user-table th {
+  background-color: #1f2937;
+  color: #ffd700; /* Arany szín, mint a profilkártyán */
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+}
+
+/* Sorok effektei */
+.user-table tbody tr:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.user-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Jobbra igazítás a művelet oszlopnak */
+.text-right {
+  text-align: right;
+}
+
+/* Törlés gomb igazítása a táblázat cellában */
+.user-table .btn-btn-danger {
+  margin: 0;
+}
+.btn-btn-danger:hover{
+  
+  color: rgb(133, 7, 7);
+}
+.btn-btn-normal:hover{
+  
+  color: rgb(41, 17, 175);
+}

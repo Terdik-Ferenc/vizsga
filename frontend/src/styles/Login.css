@@ -1,0 +1,13 @@
+.btn-login-register {
+  background-color: #0e548d;
+  color: rgb(86, 241, 133);
+  margin-left: auto; 
+  text-align: center;
+  border: 1px solid #220101;
+  border-radius: 4px;
+  cursor: pointer;
+  padding: 4px 10px; 
+}
+.error-class{
+  color: red;
+}

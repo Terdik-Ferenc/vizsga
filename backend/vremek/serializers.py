@@ -2,7 +2,8 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import Egitestek, Esemenyek, Cikkek
+from .models import Egitestek, Esemenyek, Cikkek, Kommentek
+
 
 class RegisterSerializer(serializers.ModelSerializer):
     class Meta:
@@ -18,7 +19,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         )
         return user
 
-# vremek/serializers.py
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -48,11 +48,32 @@ class EsemenyekSerializer(serializers.ModelSerializer):
     # Így a jelentkezők részletes listáját kapjuk meg, de a mező írásvédett (read_only) lesz,
     # mert a jelentkezést nem manuális JSON küldéssel, hanem egy külön gombbal (endpointtal) intézzük.
     jelentkezok = JelentkezoSerializer(many=True, read_only=True)
+    is_registered = serializers.SerializerMethodField()
+
     class Meta:
         model = Esemenyek
         fields = '__all__'
+
+    # A registered mező értékét meghatározó függvény
+    def get_is_registered(self, obj):
+        request = self.context.get('request')
+        if request and request.user.is_authenticated:
+            return obj.jelentkezok.filter(id=request.user.id).exists()
+        return False    
+
 
 class CikkekSerializer(serializers.ModelSerializer):
     class Meta:
         model = Cikkek
         fields = '__all__'
+
+
+# Kommentek modell serializer
+
+class KommentekSerializer(serializers.ModelSerializer):
+    username = serializers.ReadOnlyField(source='user.username')
+
+    class Meta:
+        model = Kommentek
+        fields = ['id', 'user', 'username', 'tartalom', 'letrehozva']
+        read_only_fields = ['user', 'letrehozva']

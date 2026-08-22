@@ -57,3 +57,14 @@ class Cikkek(models.Model):
     class Meta:
         verbose_name_plural = 'cikkek'
 
+    # Kommentek modellje
+class Kommentek(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='kommentek', verbose_name="Felhasználó")
+    tartalom = models.TextField(verbose_name="Komment tartalma")
+    letrehozva = models.DateTimeField(auto_now_add=True, verbose_name="Létrehozás ideje")
+
+    def __str__(self):
+        return f"{self.user.username} - {self.tartalom[:20]}"
+
+    class Meta:
+            verbose_name_plural = 'kommentek'

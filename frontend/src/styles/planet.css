@@ -1,0 +1,59 @@
+
+.page{
+    min-height:100vh;
+    background-image:url("../assets/hatter.webp");
+    background-size:cover;
+    background-position:center;
+    background-attachment:fixed;
+    background-repeat:no-repeat;
+
+    padding:40px;
+}
+.planet-container{
+    display: flex;
+    justify-content: center;    
+    gap: 30px;
+    flex-wrap: wrap;
+    margin-top: 40px;
+}
+.planet-card{    /* Az égitestek kártya */
+    cursor: pointer;
+    text-align: center;
+    width: 260px;
+    background-color: rgba(17, 24, 39, 0.5);
+    border: 2px solid #0d6bcf;
+    border-radius: 18px;
+    padding: 18px;
+    transition: 0.3s;
+    overflow: auto;
+}
+
+.planet-image{
+    width: 250px;
+    height: 250px;
+    
+    border-radius: 20px;
+    object-fit: cover;
+}
+.planet-card:hover{
+    transform: scale(1.05);
+}
+.planet-card button{
+    margin-top: 10px;
+}
+
+.planet-card h2{
+    color: #ffd700;
+}
+@media(max-width:768px){
+    .planet-container{
+        flex-direction: column;
+        align-items: center;
+        
+    }
+    .planet-card{
+    width: 90%;
+    max-width: 350px;    
+    }
+}
+

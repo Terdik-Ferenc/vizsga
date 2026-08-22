@@ -1,0 +1,58 @@
+.event-card{
+    background-color: rgba(31, 41, 55, 0.5);
+    padding: 20px;
+    margin: 20px auto;
+    width: 500px;
+    border: 2px solid #0d6bcf;
+    border-radius: 15px;
+    box-shadow: 0 0 10px rgba,(255,255,255,0.1);
+    
+}
+
+.event-card button{
+    padding: 10px 20px;
+    border: none;
+    border: 2px solid #0d6bcf;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.event-card button:hover{
+    background-color: #ffd700;
+}
+
+@media (max-width: 768px) {
+    .event-card {
+        width: calc(100% - 30px);
+        max-width: 100%;
+        margin: 20px auto;
+        padding: 25px 15px;
+        box-sizing: border-box;
+        overflow-wrap: anywhere;
+    }
+
+    .event-card h2 {
+        font-size: 28px;
+        text-align: center;
+        word-break: break-word;
+    }
+
+    .event-card p {
+        font-size: 18px;
+        line-height: 1.5;
+        text-align: center;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
+    .event-card button {
+        max-width: 100%;
+        padding: 12px 24px;
+    }
+
+    .page h1 {
+        font-size: 36px;
+        text-align: center;
+        padding: 0 15px;
+    }
+}

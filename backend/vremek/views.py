@@ -1,13 +1,13 @@
 from django.shortcuts import render
 from django.contrib.auth.models import User
-from rest_framework import generics, status, viewsets
+from rest_framework import generics, status, viewsets, permissions
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import generics
-from .serializers import RegisterSerializer, EgitestekSerializer, EsemenyekSerializer, CikkekSerializer
-from .models import Egitestek, Esemenyek, Cikkek
+from .serializers import RegisterSerializer, EgitestekSerializer, EsemenyekSerializer, CikkekSerializer, KommentekSerializer
+from .models import Egitestek, Esemenyek, Cikkek, Kommentek
 
 
 class RegisterView(generics.CreateAPIView):
@@ -83,3 +83,14 @@ class CikkekViewSet(viewsets.ModelViewSet):
     queryset = Cikkek.objects.all()
     serializer_class = CikkekSerializer
     permission_classes = [IsAuthenticated]
+
+
+# Kommentek viewsets
+
+class KommentekViewSet(viewsets.ModelViewSet):
+    queryset = Kommentek.objects.all().order_by('-letrehozva')
+    serializer_class = KommentekSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

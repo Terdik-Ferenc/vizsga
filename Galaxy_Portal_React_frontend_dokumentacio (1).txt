@@ -1,0 +1,410 @@
+Galaxy Portal
+
+A React frontend megvalósításának dokumentációja
+
+Vizsgamunka – Szoftverfejlesztő és tesztelő képzés
+
+Frontend technológia: React + Vite
+
+Backend kapcsolat: Django REST API
+
+
+
+A dokumentáció a frontend tényleges felépítését, működését és fontosabb
+megoldásait mutatja be.
+
+1.  A frontend célja és technológiai alapjai
+
+A Galaxy Portal egy csillagászati és űrkutatási témájú webes portál. A
+frontend feladata, hogy a Django backendben tárolt adatokat
+áttekinthető, interaktív felületen jelenítse meg, továbbá kezelje a
+felhasználói műveleteket. A rendszerben égitestek, események, cikkek és
+kommentek érhetők el, a bejelentkezett felhasználók pedig védett
+funkciókat is használhatnak.
+
+A kliensoldali alkalmazás Reactre épül, a fejlesztői és build
+környezetet Vite biztosítja. A projekt package.json fájlja alapján
+React, React DOM, React Router DOM, Axios és jwt-decode csomagokat
+használ. Az Axios a HTTP-kommunikációt, a jwt-decode a JWT access token
+tartalmának kliensoldali kiolvasását segíti.
+
+1.1. Miért komponensalapú a felépítés?
+
+A React egyik legfontosabb előnye, hogy a felület kisebb,
+újrahasznosítható komponensekre bontható. A projektben külön komponens
+kezeli például a navigációs sávot, a láblécet, az eseménykártyát, az
+égitestkártyát, az égitest részletes modal ablakát és a védett
+útvonalakat. Ez csökkenti az ismétlődő kódot, és egyszerűbbé teszi a
+későbbi módosításokat.
+
+1.2. A fontosabb mappák
+
+src/components – újrahasznosítható felületi és vezérlő komponensek.
+
+src/pages – az egyes oldalak: főoldal, égitestek, események, cikkek,
+kommentek, bejelentkezés, regisztráció és profil.
+
+src/context – a bejelentkezett felhasználó globális állapotának
+kezelése.
+
+src/services – az API-hívások és az Axios konfiguráció.
+
+src/styles – az oldalakhoz és komponensekhez tartozó CSS-fájlok.
+
+src/assets és public – képek, ikonok és videók.
+
+A projektben a megjelenítés és az adatkezelés szétválasztása jól
+megfigyelhető: az oldalak a services rétegen keresztül kérnek adatot,
+majd azt komponensekkel jelenítik meg.
+
+2.  Az alkalmazás indítása és az útvonalkezelés
+
+A main.jsx a React alkalmazás belépési pontja. A ReactDOM.createRoot
+segítségével az App komponens az index.html root elemébe kerül. Az
+alkalmazást BrowserRouter és AuthProvider veszi körül. Emiatt a teljes
+komponensfa használhatja a React Router navigációs lehetőségeit, illetve
+az AuthContextben tárolt felhasználói állapotot.
+
+ReactDOM.createRoot(document.getElementById(“root”)).render( );
+
+2.1. React Router
+
+Az App.jsx tartalmazza az alkalmazás útvonalait. A főoldal a / címen
+érhető el, az égitestek a /planets, az események a /events, egy konkrét
+esemény pedig a /events/:id útvonalon. A cikkek, kommentek, profil,
+bejelentkezés és regisztráció szintén külön route-ot kapott.
+
+A dinamikus /events/:id útvonal lehetővé teszi, hogy ugyanaz az
+EventDetails komponens több eseményt is megjelenítsen. Az esemény
+azonosítója az URL-ből olvasható ki, majd ez alapján kérhető le a
+megfelelő adat.
+
+2.2. Védett oldalak
+
+A ProtectedRoute komponens az AuthContext user értékét ellenőrzi. Ha
+nincs bejelentkezett felhasználó, a Navigate komponens a /login oldalra
+irányít. Ha van felhasználó, a children tartalom megjelenik.
+
+function ProtectedRoute({ children }) { const { user } = useAuth();
+
+    if (!user) {
+        return <Navigate to="/login" replace />;
+    }
+
+    return children;
+
+}
+
+A projektben védett az Égitestek, Események, Esemény részletei,
+Kommentek és Profil oldal. A Cikkek oldal ezzel szemben nyilvánosan
+elérhető. Ez a megoldás a felhasználói élményt és a frontend
+hozzáférés-szabályozását szolgálja; a tényleges biztonsági
+jogosultság-ellenőrzést a backendnek is el kell végeznie.
+
+3.  Felhasználói állapot, bejelentkezés és JWT
+
+A bejelentkezett felhasználó állapotát az AuthContext.jsx kezeli. Az
+AuthProvider useState segítségével tárolja a user objektumot, és
+induláskor megpróbálja visszaolvasni azt a localStorage-ból. Így egy
+oldalfrissítés után sem tűnik el azonnal a frontend felhasználói
+állapota.
+
+A login függvény kétféle adatot képes kezelni: JWT access tokent vagy
+már elkészített felhasználói objektumot. Token esetén a jwtDecode
+kiolvassa a felhasználónevét, az azonosítót, valamint az is_staff és
+is_superuser jogosultsági adatokat. A létrehozott user objektum a React
+state-be és a localStorage-ba is bekerül.
+
+3.1. Bejelentkezési folyamat
+
+A Login oldalon controlled input mezők kezelik a felhasználónevet és a
+jelszót. A form elküldésekor Axios POST kérés indul a Django
+/api/auth/login/ végpontjára. Sikeres válasz esetén a frontend eltárolja
+az access és refresh tokeneket, majd az access tokennel frissíti az
+AuthContextet.
+
+A token dekódolása után a kód az is_superuser érték alapján választ
+átirányítást. Hibás hitelesítő adatok esetén a felület magyar nyelvű
+hibaüzenetet jelenít meg.
+
+3.2. Kijelentkezés
+
+A logout függvény törli a user állapotot, valamint a user, access_token
+és refresh_token localStorage bejegyzéseket. A Navbar handleLogout
+függvénye ezután bezárja a mobilmenüt és a /login oldalra navigál.
+
+3.3. Tokenfrissítés
+
+A services/axiosInstance.js egy központi Axios példányt hoz létre. A
+request interceptor minden kérés előtt kiolvassa az access tokent, és ha
+létezik, Authorization: Bearer fejlécet ad a kéréshez.
+
+A response interceptor 401-es válasz esetén – bizonyos kivételekkel –
+megpróbálja a refresh token segítségével új access tokent kérni. Siker
+esetén az új tokent eltárolja, frissíti az eredeti kérés fejlécét, majd
+újraküldi a kérést. Sikertelen refresh esetén törli a hitelesítési
+adatokat és a bejelentkezési oldalra irányít.
+
+Ez a megoldás azért hasznos, mert a rövid élettartamú access token
+lejárata nem feltétlenül szakítja meg a felhasználói munkamenetet.
+
+4.  API-kommunikáció és adatátalakítás
+
+A frontend és a Django backend közötti kommunikáció nagy része a
+services/api.js fájlban található. Az API alapcíme fejlesztői
+környezetben a 127.0.0.1:8000 címet használja. A védett kérésekhez a
+saját Axios példány, egyes hitelesítési kérésekhez közvetlen axios hívás
+tartozik.
+
+4.1. Események
+
+A getEvents függvény lekéri az /esemenyek/ végpont adatait, majd map
+segítségével a backend magyar mezőneveit a frontendben használt
+egységesebb nevekre alakítja. Így az esemenyNev a title, az esemenyDatum
+a date, az esemenyHelyszin pedig a location mezőbe kerül.
+
+4.2. Égitestek
+
+A getPlanets hasonló adapter szerepet tölt be. A backend egitestNev,
+egitestDescription, egitestImage és egitestVideo mezőiből name,
+description, image és video készül. A kép- és videóútvonalaknál a kód
+azt is ellenőrzi, hogy teljes http URL érkezett-e. Relatív médiaútvonal
+esetén hozzáfűzi a backend címét.
+
+image: planet.egitestImage ? planet.egitestImage.startsWith(“http”) ?
+planet.egitestImage : ${BACKEND_URL}${planet.egitestImage} :
+
+4.3. Cikkek és kommentek
+
+A getArticles a cikkek címét, rövid leírását, hosszú tartalmát, képét és
+videóját alakítja át a React komponensek által használt struktúrára. A
+getComments GET kéréssel tölti le a kommenteket, az addComment pedig
+POST kéréssel küldi el az új tartalmat.
+
+4.4. Regisztráció és eseményjelentkezés
+
+A registerUser a /auth/register/ végpontnak küldi el a felhasználónevet,
+e-mail címet és jelszót. A toggleEventRegistration az adott esemény
+azonosítójával hívja az /esemenyek/{id}/jelentkezes/ végpontot. A
+frontend ezután a szerver válasza alapján frissítheti a felületet.
+
+Az API-függvények külön fájlba szervezése karbantarthatóbbá teszi az
+alkalmazást: ha egy backend végpont vagy mezőnév megváltozik, sok
+esetben elegendő a service réteget módosítani.
+
+5.  Főoldal és égitestek megjelenítése
+
+5.1. Főoldal
+
+A Home komponens egy nagyméretű, automatikusan induló, ismétlődő és
+némított WebM videót használ hero elemként. A playsInline attribútum
+mobil böngészőkön segíti a beágyazott lejátszást. A videó alatt
+bemutatkozó szöveg ismerteti a Galaxy Portal célját és a regisztrált
+felhasználók számára elérhető lehetőségeket.
+
+A megjelenést a home.css szabályozza. A sötét háttér és az űr témájú
+média vizuálisan összekapcsolja a kezdőoldalt a portál témájával.
+
+5.2. Égitestek lista
+
+A Planets oldal useState segítségével két fontos állapotot kezel: a
+planets tömböt és a selectedPlanet értéket. A useEffect az oldal első
+megjelenésekor meghívja a getPlanets függvényt, majd a kapott adatokat
+eltárolja.
+
+A planets.map minden égitestből PlanetCard komponenst készít. A kártya
+megjeleníti a képet és a nevet, valamint Részletek gombot tartalmaz. A
+kártyára kattintva a selectedPlanet az adott objektum lesz.
+
+5.3. Modal részletes nézet
+
+Ha selectedPlanet nem null, megjelenik a PlanetModal. A modal az égitest
+nevét, WebM videóját és leírását mutatja. A closeModal callback nullára
+állítja a kiválasztott égitestet, ezért a modal eltűnik.
+
+{selectedPlanet && ( <PlanetModal planet={selectedPlanet} closeModal={()
+=> setSelectedPlanet(null)} /> )}
+
+A modalos megoldás előnye, hogy a felhasználó a listaoldal elhagyása
+nélkül nézheti meg a részletes információkat. A külön PlanetCard és
+PlanetModal komponens tisztán elválasztja a rövid és részletes
+megjelenítést.
+
+6.  Események és eseményjelentkezés
+
+Az Events oldal a getEvents segítségével tölti le az eseményeket. A
+betöltő függvény useCallbackbe került, majd a useEffect ezt hívja meg.
+Az események EventCard komponensekként jelennek meg.
+
+6.1. Eseménykártya
+
+Az EventCard a cím, dátum és helyszín megjelenítéséért felel. A backend
+ISO dátumformátuma a JavaScript Date objektum és a
+toLocaleString(‘hu-HU’) segítségével magyar formátumban jelenik meg. A
+Részletek gomb az Events oldalról az esemény saját útvonalára navigál.
+
+const formattedDate = new Date(event.date).toLocaleString(“hu-HU”, {
+year: “numeric”, month: “2-digit”, day: “2-digit”, hour: “2-digit”,
+minute: “2-digit”, });
+
+6.2. Részletes eseményoldal
+
+Az EventDetails külön oldalon mutatja az esemény címét, időpontját,
+helyszínét, leírását és a jelentkezők számát. A felület vissza gombot is
+tartalmaz, amely a böngészési előzmény előző oldalára navigál.
+
+A jelentkezési gomb állapota attól függ, hogy a felhasználó
+jelentkezett-e már. A gomb felirata ennek megfelelően ‘Jelentkezem az
+eseményre’ vagy ‘Jelentkezés lemondása’. A kérés feldolgozása alatt a
+gomb letiltható és ‘Feldolgozás…’ szöveget mutat.
+
+A részletes oldal a jelentkezők listáját táblázatban is meg tudja
+jeleníteni, felhasználónévvel és e-mail címmel. Ha nincs jelentkező,
+külön üzenet jelenik meg.
+
+6.3. Felhasználói visszajelzés
+
+Az eseményjelentkezés szerveroldali művelet, ezért a frontendnek a
+sikeres vagy sikertelen válaszra is reagálnia kell. A projekt ezt a
+művelet után újratöltött eseményadattal és a gomb állapotának
+frissítésével kezeli. Ez biztosítja, hogy a képernyő a backend aktuális
+állapotát tükrözze.
+
+7.  Cikkek és kommentek
+
+7.1. Cikkek
+
+Az Articles oldal a getArticles függvénnyel tölti le a backendben tárolt
+tartalmakat. A cikkek kártyákon jelennek meg, képpel, címmel, rövid
+leírással és Olvasás gombbal. A selectedArticle state tárolja az
+aktuálisan megnyitott cikket.
+
+A részletes cikk modal ablakban jelenik meg. A modal támogatja a képet,
+a WebM videót és a hosszú szöveges tartalmat. A videó csak akkor kerül a
+DOM-ba, ha a cikkhez valóban érkezik video érték. Ez feltételes
+renderelésre példa.
+
+7.2. Kommentrendszer
+
+A Kommentek oldal bejelentkezéshez kötött. A komponens induláskor lekéri
+a meglévő kommenteket. Az új komment szövegét controlled textarea
+kezeli, az űrlap elküldésekor pedig az addComment függvény POST kérést
+indít.
+
+Sikeres küldés után a szövegmező kiürül, a hibaállapot törlődik, majd a
+kommentlista újratöltődik. Ha a kérés hibát ad, a felhasználó
+hibaüzenetet kap.
+
+7.3. Kliensoldali lapozás
+
+A kommenteknél kliensoldali lapozás készült. Egy oldalon öt elem jelenik
+meg. A totalPages a kommentek számából számolódik, majd a slice az
+aktuális oldalhoz tartozó részhalmazt választja ki. Az előző és
+következő gomb a currentPage állapotot módosítja, a szélső oldalakon
+pedig letiltott állapotba kerül.
+
+const itemsPerPage = 5; const totalPages = Math.ceil(comments.length /
+itemsPerPage); const indexOfLastItem = currentPage * itemsPerPage; const
+indexOfFirstItem = indexOfLastItem - itemsPerPage; const currentComments
+= comments.slice(indexOfFirstItem, indexOfLastItem);
+
+Ez a megoldás kis adatmennyiségnél egyszerű és jól követhető. Nagy
+kommentmennyiségnél később szerveroldali lapozással is
+továbbfejleszthető.
+
+8.  Navigáció, profil és reszponzív felület
+
+8.1. Dinamikus navigáció
+
+A Navbar a useAuth hookkal olvassa ki az aktuális felhasználót.
+Kijelentkezett állapotban a Főoldal, Belépés és Regisztráció menüpontok
+jelennek meg. Bejelentkezés után elérhetővé válik az Égitestek,
+Események, Cikkek, Kommentek és Profil menüpont, valamint a Kilépés
+gomb.
+
+A fejléc azt is jelzi, hogy melyik felhasználó van bejelentkezve. A
+Kilépés gomb törli a hitelesítési állapotot és azonnal a login oldalra
+navigál.
+
+8.2. Mobil hamburger menü
+
+A Navbar saját menuOpen state-et használ. Mobilnézetben a hamburger gomb
+váltja ezt az állapotot, és a nav-links open CSS osztály alapján nyílik
+vagy záródik a menü. A menüpontokra kattintás closeMenu hívással bezárja
+a mobilmenüt.
+
+A CSS media query-k 768 pixeles töréspont alatt átrendezik a navigációt.
+Ez fontos része a reszponzív kialakításnak, mert kis kijelzőn a teljes
+vízszintes menüsor nem férne el megfelelően.
+
+8.3. Profil és adminisztrátori funkciók
+
+A Profile oldal megjeleníti a bejelentkezett felhasználó nevét és egy
+profilképet. Ha a user.is_superuser igaz, adminisztrátori panel is
+megjelenik. Ez a panel a /api/admin/users/ végpontról felhasználólistát
+kér le, és lehetőséget ad felhasználó törlésére.
+
+A törlés előtt window.confirm megerősítést kér, majd DELETE kérés indul.
+Siker esetén a felhasználólista újratöltődik. A frontend az
+Authorization fejlécben küldi az access tokent.
+
+A normál felhasználó számára az adminisztrátori kezelőfelület nem
+jelenik meg. A jogosultság szerinti feltételes renderelés így ugyanazon
+Profile komponensen belül két eltérő felületet biztosít.
+
+9.  CSS, felhasználói élmény, tesztelés és összegzés
+
+9.1. Stílusok szervezése
+
+A projekt nem egyetlen nagy CSS-fájlt használ, hanem funkció szerint
+külön stíluslapokat. Külön fájl tartozik többek között a navbarhoz,
+főoldalhoz, égitestekhez, modalhoz, eseményekhez, eseményrészletekhez,
+cikkekhez, kommentekhez, profilhoz, admin felülethez és footerhez. A
+global.css a teljes alkalmazásra vonatkozó alapstílusokat tartalmazza.
+
+A kártyás megjelenítés, a sötét űr-tematika, a képek és videók, valamint
+a hover és átmeneti effektek egységes vizuális karaktert adnak az
+oldalnak. A reszponzív szabályok biztosítják, hogy a navigáció és a
+tartalom kisebb kijelzőn is használható maradjon.
+
+9.2. Frontend tesztelési szempontok
+
+A fejlesztés során különösen fontos ellenőrzési pont a route-ok
+működése, a védett oldalak átirányítása, a be- és kijelentkezés, a
+localStorage tartalma, a tokenfrissítés, az API-kérések státuszkódja,
+valamint a mobilnézet. Ezek böngészőből, a fejlesztői eszközök Network
+és Application/Storage nézeteivel is vizsgálhatók.
+
+Az eseményjelentkezésnél ellenőrizhető, hogy a POST kérés után
+változik-e a jelentkezési állapot és a jelentkezők listája. Az
+égitesteknél és cikkeknél tesztelhető a média URL-ek helyes felépítése,
+a modal megnyitása és bezárása. A kommenteknél a beküldés, újratöltés és
+lapozás a lényeges.
+
+9.3. Továbbfejlesztési lehetőségek
+
+A jelenlegi frontend továbbfejleszthető például egységesebb betöltési és
+hibaállapotokkal, toast értesítésekkel, szerveroldali lapozással,
+kereséssel és szűréssel, valamint az API-alapcím teljes körű környezeti
+változóba szervezésével. Érdemes lehet a közvetlen axios hívásokat is
+egységesen a központi Axios példányra terelni.
+
+A forráskódban található néhány fejlesztés közben megmaradt vagy részben
+párhuzamos megoldás is, például többféle eseményjelentkezési
+API-függvény. Ezek későbbi refaktorálással egyszerűsíthetők. Ez nem
+változtat azon, hogy a frontend fő funkciói jól elkülönített React
+komponensekre és service rétegre épülnek.
+
+9.4. Összegzés
+
+A Galaxy Portal frontendje egy többoldalas React alkalmazás, amely
+valódi Django REST API-val kommunikál. A projektben megjelenik a
+komponensalapú fejlesztés, a React Router, a Context API, a JWT-alapú
+hitelesítés, az Axios interceptor, a dinamikus adatbetöltés, a
+feltételes renderelés, a modal megjelenítés, a kliensoldali lapozás és a
+reszponzív CSS.
+
+A frontend legfontosabb eredménye, hogy a backendben kezelt
+csillagászati tartalmakat és felhasználói funkciókat egységes,
+böngészőből használható felületté szervezi. A megoldás megfelelő alapot
+ad egy további funkciókkal bővíthető csillagászati portálhoz.
